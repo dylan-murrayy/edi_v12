@@ -64,7 +64,6 @@ if df is not None:
         "AI Assistant",
         "Client Segmentation",
         "Activity and Usage",
-        "Data"
     ])
 
     # --- Overview Tab ---
