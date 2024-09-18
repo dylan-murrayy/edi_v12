@@ -97,7 +97,6 @@ if df is not None:
         col4.metric("Marketplace Connections", f"{marketplace_percentage:.2f}%")
 
         # Churn Rate
-        st.subheader("Churn Rate")
         churn_data = df_filtered.copy()
         churn_data['churned'] = churn_data.apply(
             lambda row: 1 if row['active'] == 1 and row['paid'] == 0 else 0, axis=1
