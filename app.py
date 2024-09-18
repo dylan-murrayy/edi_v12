@@ -91,14 +91,6 @@ if df is not None:
             conversion_rate = 0
         col3.metric("Conversion Rate", f"{conversion_rate:.2f}%")
 
-        # Churn Rate
-        churn_data = df_filtered.copy()
-        churn_data['churned'] = churn_data.apply(
-            lambda row: 1 if row['active'] == 1 and row['paid'] == 0 else 0, axis=1
-        )
-        churn_rate = churn_data['churned'].sum() / churn_data['client_id'].nunique() * 100
-        st.metric("Churn Rate", f"{churn_rate:.2f}%")
-
         # Marketplace Connections
         marketplace_connections = df_filtered[marketplaces].gt(0).any(axis=1).sum()
         marketplace_percentage = (marketplace_connections / total_clients) * 100 if total_clients > 0 else 0
