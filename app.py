@@ -172,30 +172,30 @@ if df is not None:
         else:
             st.write("The 'click_source' column is not available in the data.")
 
-        # User Engagement and Conversion Funnel
-            st.subheader("User Engagement and Conversion Funnel")
+    # User Engagement and Conversion Funnel
+        st.subheader("User Engagement and Conversion Funnel")
 
-            # Funnel data: Total users, connected users, active users, paid users
-            funnel_data = {
-                'Stage': ['Trial Users', 'Connected', 'Active', 'Paid'],
-                'Users': [len(df_filtered), df_filtered['connected'].sum(), df_filtered['active'].sum(), df_filtered['paid'].sum()]
-            }
+        # Funnel data: Total users, connected users, active users, paid users
+        funnel_data = {
+            'Stage': ['Trial Users', 'Connected', 'Active', 'Paid'],
+            'Users': [len(df_filtered), df_filtered['connected'].sum(), df_filtered['active'].sum(), df_filtered['paid'].sum()]
+        }
 
-            # Create a funnel chart using a bar plot
-            fig, ax = plt.subplots()
-            ax.barh(funnel_data['Stage'], funnel_data['Users'], color='skyblue')
+        # Create a funnel chart using a bar plot
+        fig, ax = plt.subplots()
+        ax.barh(funnel_data['Stage'], funnel_data['Users'], color='skyblue')
 
-            # Add labels
-            for i in range(len(funnel_data['Stage'])):
-                ax.text(funnel_data['Users'][i] + 100, i, str(funnel_data['Users'][i]), va='center')
+        # Add labels
+        for i in range(len(funnel_data['Stage'])):
+            ax.text(funnel_data['Users'][i] + 100, i, str(funnel_data['Users'][i]), va='center')
 
-            ax.set_xlabel('Number of Users')
-            ax.set_title('User Engagement and Conversion Funnel')
-            plt.gca().invert_yaxis()  # Invert y-axis to match funnel view
-            plt.tight_layout()
+        ax.set_xlabel('Number of Users')
+        ax.set_title('User Engagement and Conversion Funnel')
+        plt.gca().invert_yaxis()  # Invert y-axis to match funnel view
+        plt.tight_layout()
 
-            # Display the chart in Streamlit
-            st.pyplot(fig)
+        # Display the chart in Streamlit
+        st.pyplot(fig)
 
     # --- Activity and Usage Tab ---
     with tabs[3]:
