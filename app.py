@@ -64,6 +64,7 @@ if df is not None:
         "AI Assistant",
         "Client Segmentation",
         "Activity and Usage",
+        "Cohort Retention Analysis"
     ])
 
     # --- Overview Tab ---
@@ -225,6 +226,42 @@ if df is not None:
         )
         fig_marketplace.update_layout(xaxis_title='Marketplace', yaxis_title='Total Connections')
         st.plotly_chart(fig_marketplace, use_container_width=True)
+
+
+    # --- Cohort Retention Analysis Tab ---
+    with tabs[4]:
+        st.header("Cohort Retention Analysis")
+
+        # Convert 'trial_date' to datetime and group by cohort month
+        df_filtered['trial_month'] = df_filtered['trial_date'].dt.to_period('M')
+        cohort_data = df_filtered.groupby('trial_month').agg(
+            total_users=('client_id', 'size'),
+            connected=('connected', 'sum'),
+            active=('active', 'sum'),
+            paid=('paid', 'sum')
+        ).reset_index()
+
+        cohort_data['connected_rate'] = cohort_data['connected'] / cohort_data['total_users'] * 100
+        cohort_data['active_rate'] = cohort_data['active'] / cohort_data['total_users'] * 100
+        cohort_data['paid_rate'] = cohort_data['paid'] / cohort_data['total_users'] * 100
+
+        fig_cohort_retention = go.Figure()
+        fig_cohort_retention.add_trace(go.Scatter(x=cohort_data['trial_month'].astype(str),
+                                                y=cohort_data['connected_rate'], mode='lines+markers', name='Connected Rate'))
+        fig_cohort_retention.add_trace(go.Scatter(x=cohort_data['trial_month'].astype(str),
+                                                y=cohort_data['active_rate'], mode='lines+markers', name='Active Rate'))
+        fig_cohort_retention.add_trace(go.Scatter(x=cohort_data['trial_month'].astype(str),
+                                                y=cohort_data['paid_rate'], mode='lines+markers', name='Paid Rate'))
+
+        fig_cohort_retention.update_layout(
+            title="Cohort Retention Analysis",
+            xaxis_title="Cohort Month",
+            yaxis_title="Retention Rate (%)",
+            legend_title="Retention Stage"
+        )
+
+        # Display the plot
+        st.plotly_chart(fig_cohort_retention, use_container_width=True)
 
 else:
     st.write("Please upload a CSV file to begin.")
