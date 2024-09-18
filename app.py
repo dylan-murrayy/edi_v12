@@ -64,8 +64,6 @@ if df is not None:
         "AI Assistant",
         "Client Segmentation",
         "Activity and Usage",
-        "Client Retention and Churn",
-        "Cohort Analysis",
         "Data"
     ])
 
@@ -97,6 +95,15 @@ if df is not None:
         marketplace_connections = df_filtered[marketplaces].gt(0).any(axis=1).sum()
         marketplace_percentage = (marketplace_connections / total_clients) * 100 if total_clients > 0 else 0
         col4.metric("Marketplace Connections", f"{marketplace_percentage:.2f}%")
+
+        # Churn Rate
+        st.subheader("Churn Rate")
+        churn_data = df_filtered.copy()
+        churn_data['churned'] = churn_data.apply(
+            lambda row: 1 if row['active'] == 1 and row['paid'] == 0 else 0, axis=1
+        )
+        churn_rate = churn_data['churned'].sum() / churn_data['client_id'].nunique() * 100
+        st.metric("Churn Rate", f"{churn_rate:.2f}%")
 
         # Time-Based Trends
         st.header("Time-Based Trends")
@@ -228,98 +235,6 @@ if df is not None:
         )
         fig_marketplace.update_layout(xaxis_title='Marketplace', yaxis_title='Total Connections')
         st.plotly_chart(fig_marketplace, use_container_width=True)
-
-    # --- Client Retention and Churn Tab ---
-    with tabs[4]:
-        st.header("Client Retention and Churn")
-
-        # Retention Rate by Trial Rank
-        st.subheader("Retention Rate by Trial Rank")
-        retention_data = df_filtered[df_filtered['trial_rank'].notna()]
-        retention_data['converted'] = retention_data['paid']
-        retention_by_rank = retention_data.groupby('trial_rank').agg(
-            trial_clients=('client_id', 'nunique'),
-            converted_clients=('converted', 'sum')
-        ).reset_index()
-        retention_by_rank['conversion_rate'] = (
-            retention_by_rank['converted_clients'] / retention_by_rank['trial_clients']
-        ) * 100
-        fig_retention = px.bar(
-            retention_by_rank,
-            x='trial_rank',
-            y='conversion_rate',
-            title='Conversion Rate by Trial Rank',
-            color='conversion_rate',
-            color_continuous_scale='Inferno'
-        )
-        fig_retention.update_layout(xaxis_title='Trial Rank', yaxis_title='Conversion Rate (%)')
-        st.plotly_chart(fig_retention, use_container_width=True)
-
-        # Churn Rate
-        st.subheader("Churn Rate")
-        churn_data = df_filtered.copy()
-        churn_data['churned'] = churn_data.apply(
-            lambda row: 1 if row['active'] == 1 and row['paid'] == 0 else 0, axis=1
-        )
-        churn_rate = churn_data['churned'].sum() / churn_data['client_id'].nunique() * 100
-        st.metric("Churn Rate", f"{churn_rate:.2f}%")
-
-    # # --- Cohort Analysis Tab ---
-    # # Cohort Analysis
-    # st.header("Cohort Analysis")
-
-    # # Cohort Conversion Rate
-    # st.subheader("Cohort Conversion Rate")
-    # cohort_data = df_filtered.copy()
-    # cohort_data['signup_month'] = cohort_data['trial_date'].dt.to_period('M').dt.to_timestamp()
-    # cohort_data = cohort_data[cohort_data['signup_month'].notna()]
-    # cohort_pivot = cohort_data.pivot_table(
-    #     index='signup_month',
-    #     columns='paid',
-    #     values='client_id',
-    #     aggfunc='nunique'
-    # ).fillna(0)
-
-    # # Debug: Print the columns
-    # st.write("Cohort Pivot Columns:", cohort_pivot.columns)
-
-    # # Ensure the columns are correctly referenced
-    # if 1 in cohort_pivot.columns and 0 in cohort_pivot.columns:
-    #     cohort_pivot['conversion_rate'] = (
-    #         cohort_pivot[1] / (cohort_pivot[1] + cohort_pivot[0]) * 100
-    #     )
-    # elif 'Yes' in cohort_pivot.columns and 'No' in cohort_pivot.columns:
-    #     # Adjust if 'paid' column uses 'Yes'/'No' instead of 1/0
-    #     cohort_pivot['conversion_rate'] = (
-    #         cohort_pivot['Yes'] / (cohort_pivot['Yes'] + cohort_pivot['No']) * 100
-    #     )
-    # else:
-    #     st.error("Expected columns not found in cohort_pivot.")
-    #     st.write("Available columns:", cohort_pivot.columns)
-    #     # Handle the error or exit the section
-    #     cohort_pivot['conversion_rate'] = 0
-
-    # fig_cohort = px.imshow(
-    #     cohort_pivot[['conversion_rate']],
-    #     labels=dict(x="Conversion Rate", y="Signup Month", color="Conversion Rate (%)"),
-    #     x=['Conversion Rate'],
-    #     y=cohort_pivot.index.strftime('%Y-%m'),
-    #     color_continuous_scale='Viridis'
-    # )
-    # st.plotly_chart(fig_cohort, use_container_width=True)
-
-
-    # # --- Data Tab ---
-    # with tabs[6]:
-    #     st.header("Data Overview")
-
-    #     # Display the raw data
-    #     st.subheader("Raw Data")
-    #     st.write(df_filtered.head(50))
-
-    #     # Display summary statistics
-    #     st.subheader("Summary Statistics")
-    #     st.write(df_filtered.describe())
 
 else:
     st.write("Please upload a CSV file to begin.")
